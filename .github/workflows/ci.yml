@@ -20,3 +20,10 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm test
+      - run: pnpm supabase start
+        env:
+          SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID: local-test-client-id
+          SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET: local-test-client-secret
+      - run: pnpm test:db
+      - if: always()
+        run: pnpm supabase stop --no-backup
