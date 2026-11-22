@@ -4,6 +4,7 @@ import type { Session } from "@supabase/supabase-js";
 import { DesignSystemPage } from "./pages/DesignSystemPage.js";
 import { AuthPage } from "./pages/AuthPage.js";
 import { HoldingsPage } from "./pages/HoldingsPage.js";
+import { DashboardPage } from "./pages/DashboardPage.js";
 import { getBrowserSupabaseClient } from "./lib/supabase.js";
 import { Toaster } from "./components/ui/sonner.js";
 
@@ -94,8 +95,9 @@ export function App() {
         <Route path="/design" element={import.meta.env.DEV ? <DesignSystemPage /> : <NotFound />} />
         <Route
           path="/login"
-          element={session ? <Navigate to="/holdings" replace /> : <AuthPage />}
+          element={session ? <Navigate to="/dashboard" replace /> : <AuthPage />}
         />
+        <Route path="/dashboard" element={authGate(<DashboardPage session={session!} />)} />
         <Route
           path="/holdings"
           element={authGate(
@@ -117,7 +119,7 @@ export function App() {
                 {authError}
               </main>
             ) : (
-              <Navigate to={session ? "/holdings" : "/login"} replace />
+              <Navigate to={session ? "/dashboard" : "/login"} replace />
             )
           }
         />

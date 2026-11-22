@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select extensions.plan(32);
+select extensions.plan(36);
 
 insert into auth.users (id, email)
 values
@@ -199,6 +199,23 @@ select extensions.throws_ok(
 select extensions.throws_ok(
   $$delete from public.holdings$$,
   '42501', null, 'Anonymous users cannot delete holdings'
+);
+select extensions.throws_ok(
+  $$select * from public.price_cache where ticker = 'RLS'$$,
+  '42501', null, 'Anonymous users cannot read shared price cache'
+);
+select extensions.throws_ok(
+  $$insert into public.price_cache (ticker, date, close)
+    values ('RLS', current_date + 1, 11)$$,
+  '42501', null, 'Anonymous users cannot insert shared prices'
+);
+select extensions.throws_ok(
+  $$update public.price_cache set close = 11 where ticker = 'RLS'$$,
+  '42501', null, 'Anonymous users cannot update shared prices'
+);
+select extensions.throws_ok(
+  $$delete from public.price_cache where ticker = 'RLS'$$,
+  '42501', null, 'Anonymous users cannot delete shared prices'
 );
 
 set local role authenticated;

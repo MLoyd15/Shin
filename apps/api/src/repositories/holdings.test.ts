@@ -16,17 +16,34 @@ function createRepository(fetchImplementation: typeof fetch, userId = ownerA) {
 }
 
 describe("holdings repository", () => {
-  it("lists holdings scoped to the authenticated user and keeps the JWT", async () => {
-    let observed: Request | undefined;
+  it("lists holdings scoped to the authenticated user and adds ticker metadata", async () => {
+    const observed: Request[] = [];
     const repository = createRepository(async (input, init) => {
-      observed = new Request(input, init);
-      return Response.json([{ ticker: "AAA", user_id: ownerA, shares: "2", avg_cost: "10", tags: [] }]);
+      const request = new Request(input, init);
+      observed.push(request);
+      if (new URL(request.url).pathname.endsWith("/holdings")) {
+        return Response.json([
+          { ticker: "AAA", user_id: ownerA, shares: "2", avg_cost: "10", tags: [] },
+        ]);
+      }
+      return Response.json([
+        {
+          symbol: "AAA",
+          name: "AAA Inc.",
+          sector: "Technology",
+          industry: null,
+          currency: "USD",
+        },
+      ]);
     });
     const rows = await repository.list();
-    const requestUrl = new URL(observed!.url);
-    expect(rows[0]?.ticker).toBe("AAA");
-    expect(requestUrl.searchParams.get("user_id")).toBe(`eq.${ownerA}`);
-    expect(observed!.headers.get("authorization")).toBe("Bearer user-a-jwt");
+    const holdingsUrl = new URL(observed[0]!.url);
+    expect(rows[0]).toMatchObject({ ticker: "AAA", name: "AAA Inc.", sector: "Technology" });
+    expect(holdingsUrl.searchParams.get("user_id")).toBe(`eq.${ownerA}`);
+    expect(observed).toHaveLength(2);
+    expect(
+      observed.every((request) => request.headers.get("authorization") === "Bearer user-a-jwt"),
+    ).toBe(true);
   });
 
   it("adds user_id from the repository context on create and bulk import", async () => {
@@ -75,7 +92,9 @@ describe("holdings repository", () => {
     });
     await expect(repository.findTicker("AAA")).resolves.toMatchObject({ symbol: "AAA" });
     await expect(repository.findTickers(["AAA"])).resolves.toHaveLength(1);
-    expect(observed.every((request) => new URL(request.url).pathname.endsWith("/tickers"))).toBe(true);
+    expect(observed.every((request) => new URL(request.url).pathname.endsWith("/tickers"))).toBe(
+      true,
+    );
     expect(observed.every((request) => request.method === "GET")).toBe(true);
   });
 
