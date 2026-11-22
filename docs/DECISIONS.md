@@ -2,4 +2,36 @@
 
 - Use Supabase's local pgTAP suite for the two-user RLS integration test so policies run against PostgreSQL itself.
 - Require Node 22.13 or newer because pnpm 11 and the current Supabase JavaScript client need that runtime.
+- Pin pnpm 11.25.0 in the package manifest and CI so local installs and automated checks use the same workspace tool version.
 - Dark mode uses the six specified chart colors; light mode darkens those hues so chart marks remain legible on white cards.
+- Store shares as numeric(28,12) and unit prices as numeric(20,8) to retain fractional shares and decimal prices without floating-point rounding.
+- Let `/design?theme=light` override the persisted theme so light-mode screenshots and checks are reproducible.
+- Use a private decimal.js clone at 50 significant digits with ROUND_HALF_EVEN to preserve headroom in chained ratios while isolating shared Decimal settings; core does not explicitly quantize money or display values.
+- Return percentage metrics as fractions to match `packages/shared` `formatPercent`, which formats `0.25` as 25%.
+- Treat a missing/null price as an error and zero as a valid price so unavailable data is not mistaken for a zero valuation.
+- Compute day-change percentage against prior portfolio value and gain/loss percentage against cost basis, matching each metric's comparison base.
+- Use sample standard deviation for annualized volatility because the observed return series estimates a population of future returns.
+- Report max drawdown as a positive loss fraction and skip zero peaks so drawdown never divides by zero.
+- Exclude unknown-sector holdings from sector-concentration candidates but keep total portfolio value as the percentage denominator so unknown value is not redistributed.
+- Compound every matching ticker/tag scenario rule once per rule so overlapping shocks combine multiplicatively; repeated copies of one tag do not apply one rule repeatedly.
+- Compare tickers exactly and use lexical string order for deterministic ties and output; callers own case normalization.
+- Return null percentages when a denominator is zero because a fraction is undefined, rather than inventing a percentage.
+- Reject duplicate ticker rows in the same import file and existing holdings; report each affected row as skipped so confirm can use one atomic bulk insert.
+- Cap CSV uploads at 1 MiB and 500 non-empty data rows to match bounded server parsing and preview work.
+- Parse CSV without a dependency using quoted-field rules; ignore empty physical lines and report each data row by its starting physical line number.
+- Treat extra columns as row-level errors so other valid rows remain previewable; treat missing, duplicate, or unknown headers as file-level errors.
+- Neutralize formula-like text fields with a leading apostrophe in previews while numeric fields go through strict decimal validation.
+- Accept only plain signed decimal notation within the database column scale (shares 12 fractional digits, average cost 8); reject exponent notation and excess scale rather than rounding.
+- Normalize tags by trimming and lowercasing, drop empty entries, deduplicate, and cap at 10 tags of at most 32 characters; CSV tags use semicolons.
+- Default an omitted CSV currency to USD and reject any other currency because holdings are USD-only in this plan phase.
+- Bind import previews to the user, exact CSV content, ticker catalog and existing holdings with an HMAC token that expires after 15 minutes; confirmation reparses and revalidates raw CSV.
+- Confirm imports with one bulk PostgREST insert; the unique constraint makes a concurrent duplicate fail the single statement with no partial import.
+- Normalize tickers by trimming and uppercasing at API input boundaries so database symbol matching is consistent.
+- Return 404 when a scoped update or delete finds no holding, including another user's ticker, to avoid disclosing ownership.
+- Keep edits limited to shares, average cost, and tags; ticker is immutable after creation.
+- Seed only AAPL, MSFT, NVDA, KO, and XOM as development/demo ticker rows; the app has read-only ticker repository methods.
+- Add a minimal email/password sign-in and sign-up screen because the holdings UI needs an authenticated JWT and no other auth provider is required for this task.
+- Use Decimal comparisons for numeric UI sorting and omit position cost-basis totals because portfolio-core is not wired to holdings in this scope.
+- Use browser confirmation for deleting a holding, which provides a clear confirmation step without introducing another dialog interaction pattern.
+- Allow a `theme=light` or `theme=dark` query override on the holdings page so both theme screenshots are reproducible, while otherwise honoring the saved design theme.
+- Add dev-only in-memory holdings preview states to capture the requested empty, populated, and import-error screenshots without requiring or writing to a live database.

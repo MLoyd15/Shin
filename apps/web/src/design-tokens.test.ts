@@ -4,6 +4,14 @@ import { describe, expect, it } from "vitest";
 
 const stylesheet = readFileSync(fileURLToPath(new URL("./index.css", import.meta.url)), "utf8");
 const html = readFileSync(fileURLToPath(new URL("../index.html", import.meta.url)), "utf8");
+const skeletonSource = readFileSync(
+  fileURLToPath(new URL("./components/ui/skeleton.tsx", import.meta.url)),
+  "utf8",
+);
+const toasterSource = readFileSync(
+  fileURLToPath(new URL("./components/ui/sonner.tsx", import.meta.url)),
+  "utf8",
+);
 
 function getThemeTokens(selector: string): Record<string, string> {
   const block = stylesheet.match(new RegExp(`${selector}\\s*\\{([^}]+)\\}`))?.[1];
@@ -60,13 +68,32 @@ describe("FolioAgent design tokens", () => {
     "keeps text and status colors readable on every %s surface",
     (theme) => {
       const tokens = getThemeTokens(theme);
-      const surfaces = [tokens["background"], tokens["surface"], tokens["surface-elevated"]];
+      const surfaces = [
+        tokens["background"],
+        tokens["surface"],
+        tokens["surface-elevated"],
+        tokens["card"],
+        tokens["popover"],
+        tokens["secondary"],
+        tokens["muted"],
+        tokens["accent"],
+        tokens["sidebar"],
+      ];
 
       for (const foreground of [
         tokens["text"],
         tokens["text-muted"],
+        tokens["primary"],
         tokens["positive"],
         tokens["negative"],
+        tokens["warning"],
+        tokens["foreground"],
+        tokens["card-foreground"],
+        tokens["popover-foreground"],
+        tokens["secondary-foreground"],
+        tokens["accent-foreground"],
+        tokens["sidebar-foreground"],
+        tokens["sidebar-accent-foreground"],
       ]) {
         expect(foreground).toBeDefined();
         for (const background of surfaces) {
@@ -77,10 +104,15 @@ describe("FolioAgent design tokens", () => {
       expect(contrast(tokens["primary-foreground"]!, tokens["primary"]!)).toBeGreaterThanOrEqual(
         4.5,
       );
+      expect(
+        contrast(tokens["sidebar-primary-foreground"]!, tokens["sidebar-primary"]!),
+      ).toBeGreaterThanOrEqual(4.5);
     },
   );
 
   it("disables nonessential motion when reduced motion is requested", () => {
     expect(stylesheet).toMatch(/prefers-reduced-motion:\s*reduce/);
+    expect(skeletonSource).not.toMatch(/animate-pulse/);
+    expect(toasterSource).not.toMatch(/animate-spin/);
   });
 });
