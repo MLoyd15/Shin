@@ -180,3 +180,37 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+:root {
+  --duration-fast: 120ms;
+  --duration-normal: 200ms;
+  --duration-slow: 320ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasized: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --elevation-1: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --elevation-2: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --elevation-3: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-floating: 0 20px 25px -5px rgb(0 0 0 / 0.15), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --highlight-recipe: inset 0 1px 0 0 rgb(255 255 255 / 0.08);
+}
+
+.dark {
+  --elevation-1: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+  --elevation-2: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+  --elevation-3: 0 10px 15px -3px rgb(0 0 0 / 0.6), 0 4px 6px -4px rgb(0 0 0 / 0.5);
+  --shadow-floating: 0 20px 25px -5px rgb(0 0 0 / 0.7), 0 8px 10px -6px rgb(0 0 0 / 0.5);
+  --highlight-recipe: inset 0 1px 0 0 rgb(255 255 255 / 0.12);
+}
+
+@theme inline {
+  --duration-fast: var(--duration-fast);
+  --duration-normal: var(--duration-normal);
+  --duration-slow: var(--duration-slow);
+  --ease-standard: var(--ease-standard);
+  --ease-emphasized: var(--ease-emphasized);
+  --elevation-1: var(--elevation-1);
+  --elevation-2: var(--elevation-2);
+  --elevation-3: var(--elevation-3);
+  --shadow-floating: var(--shadow-floating);
+  --highlight-recipe: var(--highlight-recipe);
+}

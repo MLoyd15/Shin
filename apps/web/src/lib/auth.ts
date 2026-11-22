@@ -8,16 +8,26 @@ export interface EmailCredentials {
 
 export type AuthGateway = Pick<
   SupabaseClient["auth"],
-  "signUp" | "signInWithPassword" | "signInWithOAuth" | "signOut"
+  "signUp" | "signInWithPassword" | "signInWithOAuth" | "signOut" | "resend"
 >;
 
 export function createAuthActions(auth: AuthGateway) {
   return {
-    signUpWithEmail(credentials: EmailCredentials) {
-      return auth.signUp(credentials);
+    signUpWithEmail(credentials: EmailCredentials, emailRedirectTo: string) {
+      return auth.signUp({
+        ...credentials,
+        options: { emailRedirectTo },
+      });
     },
     signInWithEmail(credentials: EmailCredentials) {
       return auth.signInWithPassword(credentials);
+    },
+    resendSignupConfirmation(email: string, emailRedirectTo: string) {
+      return auth.resend({
+        type: "signup",
+        email,
+        options: { emailRedirectTo },
+      });
     },
     signInWithGoogle(redirectTo: string) {
       return auth.signInWithOAuth({

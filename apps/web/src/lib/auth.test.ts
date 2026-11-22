@@ -10,18 +10,23 @@ describe("browser auth actions", () => {
       signInWithPassword: vi.fn(),
       signInWithOAuth: vi.fn(),
       signOut: vi.fn(),
+      resend: vi.fn(),
     } as unknown as AuthGateway;
   });
 
   it("uses Supabase email sign-up", async () => {
-    await createAuthActions(auth).signUpWithEmail({
-      email: "investor@example.test",
-      password: "correct-horse-battery-staple",
-    });
+    await createAuthActions(auth).signUpWithEmail(
+      {
+        email: "investor@example.test",
+        password: "correct-horse-battery-staple",
+      },
+      "http://localhost:5173/login",
+    );
 
     expect(auth.signUp).toHaveBeenCalledWith({
       email: "investor@example.test",
       password: "correct-horse-battery-staple",
+      options: { emailRedirectTo: "http://localhost:5173/login" },
     });
   });
 
@@ -34,6 +39,19 @@ describe("browser auth actions", () => {
     expect(auth.signInWithPassword).toHaveBeenCalledWith({
       email: "investor@example.test",
       password: "correct-horse-battery-staple",
+    });
+  });
+
+  it("resends a signup confirmation to the app callback URL", async () => {
+    await createAuthActions(auth).resendSignupConfirmation(
+      "investor@example.test",
+      "http://localhost:5173/login",
+    );
+
+    expect(auth.resend).toHaveBeenCalledWith({
+      type: "signup",
+      email: "investor@example.test",
+      options: { emailRedirectTo: "http://localhost:5173/login" },
     });
   });
 
