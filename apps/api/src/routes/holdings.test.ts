@@ -43,4 +43,15 @@ describe("holdings HTTP isolation", () => {
     expect(seen.every((call) => call.authorization === "Bearer user-a-token")).toBe(true);
     expect(seen.slice(1).every((call) => call.ticker === "eq.OTHER")).toBe(true);
   });
+
+  it("rejects CSV requests larger than 1 MiB with a clear 413", async () => {
+    const response = await fetch(`${baseUrl}/api/holdings/import/preview`, {
+      method: "POST",
+      headers: { Authorization: "Bearer user-a-token", "Content-Type": "text/csv" },
+      body: `ticker,shares,avg_cost\n${"x".repeat(1_048_576)}`,
+    });
+
+    expect(response.status).toBe(413);
+    expect(await response.json()).toMatchObject({ error: expect.stringMatching(/1 MiB/i) });
+  });
 });

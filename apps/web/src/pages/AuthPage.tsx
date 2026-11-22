@@ -34,10 +34,10 @@ export function AuthPage() {
         <h1 className="mt-5 text-2xl font-semibold">{mode === "sign-in" ? "Welcome back" : "Create your account"}</h1>
         <p className="mt-2 text-sm text-muted-foreground">Sign in to manage your holdings.</p>
         <form className="mt-6 space-y-4" onSubmit={submit}>
-          <label className="block text-sm font-medium" htmlFor="email">Email</label>
-          <Input id="email" autoComplete="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
-          <label className="block text-sm font-medium" htmlFor="password">Password</label>
-          <Input id="password" autoComplete={mode === "sign-in" ? "current-password" : "new-password"} type="password" minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} required />
+          <label className="block text-sm font-medium" htmlFor="auth-email">Email</label>
+          <Input id="auth-email" autoComplete="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+          <label className="block text-sm font-medium" htmlFor="auth-password">Password</label>
+          <Input id="auth-password" autoComplete={mode === "sign-in" ? "current-password" : "new-password"} type="password" minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} required />
           {message && <p className="text-sm text-destructive" role="status">{message}</p>}
           <Button className="w-full" type="submit" disabled={busy}>{busy ? "Please wait…" : mode === "sign-in" ? "Sign in" : "Create account"}</Button>
         </form>

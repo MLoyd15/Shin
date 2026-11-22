@@ -94,6 +94,26 @@ describe("holdings service", () => {
     expect(state.insertMany).not.toHaveBeenCalled();
   });
 
+  it("returns a conflict if a duplicate races with the atomic bulk insert", async () => {
+    const insertMany = vi.fn(async () => {
+      throw { code: "23505" };
+    });
+    const { repository } = makeRepository({ insertMany });
+    const service = new HoldingsService(repository, ownerA, "preview-secret-at-least-32-characters");
+    const csv = "ticker,shares,avg_cost\nAAA,1,10\nBBB,2,20";
+    const preview = await service.previewCsv(csv);
+
+    await expect(service.confirmCsv(csv, preview.previewToken)).rejects.toMatchObject({
+      status: 409,
+      message: "A duplicate holding appeared; no rows were imported",
+    });
+    expect(insertMany).toHaveBeenCalledTimes(1);
+    expect(insertMany).toHaveBeenCalledWith([
+      { ticker: "AAA", shares: "1", avg_cost: "10", tags: [] },
+      { ticker: "BBB", shares: "2", avg_cost: "20", tags: [] },
+    ]);
+  });
+
   it("inserts only revalidated eligible rows with one bulk repository call", async () => {
     const { repository, state } = makeRepository();
     const service = new HoldingsService(repository, ownerA, "preview-secret-at-least-32-characters");
